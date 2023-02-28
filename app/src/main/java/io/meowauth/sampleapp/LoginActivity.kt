@@ -1,5 +1,6 @@
 package io.meowauth.sampleapp
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
@@ -78,7 +79,10 @@ class LoginActivity : ComponentActivity() {
                                     modifier = Modifier.size(17.2.dp)
                                 )
                             },
-                            onClick = {},
+                            onClick = {
+                                startActivity(Intent(this@LoginActivity, MainActivity::class.java))
+                                finish()
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 24.dp)
