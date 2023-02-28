@@ -165,7 +165,7 @@ class MainActivity : ComponentActivity() {
                             title = "Connect to Your Own Wallet",
                             description = "Manage and control your assets in one single place, your own wallet.",
                             iconResource = R.drawable.icon_flow,
-                            onClick = {},
+                            onClick = { isFlowIntegrateBottomSheetOpened = true },
                             modifier = Modifier.padding(top = 28.dp, start = 15.dp, end = 15.dp)
                         )
                         Text(
