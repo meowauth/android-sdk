@@ -38,6 +38,7 @@ fun MeowGreenInformation(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             modifier = modifier
                 .fillMaxWidth()
+                .clickable { onClick() }
                 .clip(RoundedCornerShape(16.dp))
                 .background(Color(0xFF00EF8B).copy(alpha = 0.2f))
         ) {
@@ -79,7 +80,6 @@ fun MeowGreenInformation(
                 .align(Alignment.TopEnd)
                 .padding(top = 40.dp, end = 30.dp)
                 .size(16.dp)
-                .clickable { onClick() }
         )
     }
 }

@@ -80,6 +80,7 @@ class MainActivity : ComponentActivity() {
                     var isRevokeDialogOpened by remember { mutableStateOf(false) }
                     var isConfirmBottomSheetOpened by remember { mutableStateOf(false) }
                     var is2FABottomSheetOpened by remember { mutableStateOf(false) }
+                    var isFlowIntegrateBottomSheetOpened by remember { mutableStateOf(false) }
 
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -127,7 +128,7 @@ class MainActivity : ComponentActivity() {
                                 tint = Color(0xff707379),
                                 modifier = Modifier
                                     .size(12.dp)
-                                    .clickable { }
+                                    .clickable { isFlowIntegrateBottomSheetOpened = true }
                             )
                         }
                         Row(
@@ -426,6 +427,84 @@ class MainActivity : ComponentActivity() {
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(top = 34.dp)
+                                            .navigationBarsPadding()
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    if (isFlowIntegrateBottomSheetOpened) {
+                        BottomSheetDialog(
+                            onDismissRequest = { isFlowIntegrateBottomSheetOpened = false },
+                            properties = BottomSheetDialogProperties(
+                                enableEdgeToEdge = true,
+                            )
+                        ) {
+                            Surface(
+                                shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+                                color = Color(0xFF212121),
+                            ) {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .navigationBarsPadding()
+                                        .padding(16.dp)
+                                        .verticalScroll(rememberScrollState())
+                                ) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.icon_flow),
+                                        tint = Color.Unspecified,
+                                        contentDescription = null,
+                                        modifier = Modifier
+                                            .padding(top = 36.dp)
+                                            .size(80.dp)
+                                    )
+                                    Text(
+                                        text = "Manage Your Assets\n" +
+                                                "in One Place, Your Wallet",
+                                        fontFamily = PPObjectSans,
+                                        color = Color.White,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 21.sp,
+                                        letterSpacing = (-0.01).sp,
+                                        lineHeight = 28.sp,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.padding(top = 22.dp)
+                                    )
+
+                                    Text(
+                                        text = "It’s highly recommended to add more device\ninto your account.",
+                                        fontFamily = PretendardFont,
+                                        color = Color(0xFFA7A7A7),
+                                        fontWeight = FontWeight.Normal,
+                                        fontSize = 14.sp,
+                                        lineHeight = 18.sp,
+                                        letterSpacing = (-0.01).sp,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.padding(top = 16.dp)
+                                    )
+                                    MeowButton(
+                                        label = "Connect Wallet",
+                                        backgroundColor = Color(0xFF58A5FF),
+                                        labelColor = Color.White,
+                                        contentPadding = PaddingValues(horizontal = 40.dp, vertical = 12.dp),
+                                        onClick = {},
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(top = 70.dp)
+                                    )
+                                    Text(
+                                        text = "Powered by MeowAuth",
+                                        fontFamily = PPObjectSans,
+                                        color = Color(0xFF545454),
+                                        fontWeight = FontWeight.Medium,
+                                        letterSpacing = (-0.01).sp,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(top = 13.dp)
                                             .navigationBarsPadding()
                                     )
                                 }
