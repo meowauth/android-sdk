@@ -1,5 +1,6 @@
 package io.meowauth.sampleapp
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
@@ -149,12 +150,14 @@ class MainActivity : ComponentActivity() {
                             MeowSquareButton(
                                 iconResource = R.drawable.icon_swap,
                                 label = "Swap",
-                                onClick = {},
+                                onClick = {
+                                    startActivity(Intent(this@MainActivity, TFATransactionActivity::class.java))
+                                },
                             )
                             MeowSquareButton(
                                 iconResource = R.drawable.icon_more,
                                 label = "More",
-                                onClick = {},
+                                onClick = { startActivity(Intent(this@MainActivity, TFALoginActivity::class.java)) },
                             )
                         }
                         MeowGreenInformation(
