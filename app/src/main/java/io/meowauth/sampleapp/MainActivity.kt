@@ -78,6 +78,7 @@ class MainActivity : ComponentActivity() {
 
                     var isRevokeDialogOpened by remember { mutableStateOf(false) }
                     var isConfirmBottomSheetOpened by remember { mutableStateOf(false) }
+                    var is2FABottomSheetOpened by remember { mutableStateOf(false) }
 
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -143,7 +144,7 @@ class MainActivity : ComponentActivity() {
                             MeowSquareButton(
                                 iconResource = R.drawable.icon_top_up,
                                 label = "Top Up",
-                                onClick = {},
+                                onClick = { is2FABottomSheetOpened = true },
                             )
                             MeowSquareButton(
                                 iconResource = R.drawable.icon_swap,
@@ -344,6 +345,84 @@ class MainActivity : ComponentActivity() {
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(top = 13.dp)
+                                            .navigationBarsPadding()
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    if (is2FABottomSheetOpened) {
+                        BottomSheetDialog(
+                            onDismissRequest = { is2FABottomSheetOpened = false },
+                            properties = BottomSheetDialogProperties(
+                                enableEdgeToEdge = true,
+                            )
+                        ) {
+                            Surface(
+                                shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+                                color = Color(0xFF212121),
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .navigationBarsPadding()
+                                        .padding(24.dp)
+                                        .verticalScroll(rememberScrollState())
+                                ) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.icon_shield),
+                                        tint = Color.White,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(36.dp)
+                                    )
+                                    Text(
+                                        text = "2-Step Verification",
+                                        fontFamily = PPObjectSans,
+                                        color = Color.White,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 21.sp,
+                                        letterSpacing = (-0.01).sp,
+                                        modifier = Modifier.padding(top = 12.dp)
+                                    )
+                                    Row {
+                                        Text(
+                                            text = "Check your",
+                                            fontFamily = PPObjectSans,
+                                            color = Color(0xFFA0A0A0),
+                                            fontWeight = FontWeight.Medium,
+                                            fontSize = 16.sp,
+                                            letterSpacing = (-0.01).sp,
+                                        )
+                                        Text(
+                                            text = " Galaxy S22",
+                                            fontFamily = PPObjectSans,
+                                            color = Color(0xFFA0A0A0),
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 16.sp,
+                                            letterSpacing = (-0.01).sp,
+                                        )
+                                    }
+                                    Text(
+                                        text = "We sent a notification to your MeowExample app on Galaxy S22. Tap authorize to continue.",
+                                        fontFamily = PretendardFont,
+                                        color = Color(0xFFA7A7A7),
+                                        fontWeight = FontWeight.Normal,
+                                        fontSize = 14.sp,
+                                        lineHeight = 18.sp,
+                                        letterSpacing = (-0.01).sp,
+                                        modifier = Modifier.padding(top = 32.dp)
+                                    )
+                                    Text(
+                                        text = "Powered by MeowAuth",
+                                        fontFamily = PPObjectSans,
+                                        color = Color(0xFF545454),
+                                        fontWeight = FontWeight.Medium,
+                                        letterSpacing = (-0.01).sp,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(top = 34.dp)
                                             .navigationBarsPadding()
                                     )
                                 }
