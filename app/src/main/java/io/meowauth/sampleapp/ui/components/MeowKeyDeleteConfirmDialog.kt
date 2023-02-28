@@ -52,7 +52,7 @@ fun MeowKeyDeleteConfirmDialog(
                 fontFamily = PPObjectSans,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
-                lineHeight = 20.sp,
+                lineHeight = 22.sp,
                 color = Color.White,
                 letterSpacing = (-0.01).sp,
             )
