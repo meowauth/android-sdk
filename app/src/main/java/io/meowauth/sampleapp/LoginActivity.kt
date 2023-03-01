@@ -1,19 +1,19 @@
 package io.meowauth.sampleapp
 
+import android.Manifest
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.foundation.layout.width
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -24,20 +24,56 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
+import com.firebase.ui.auth.AuthUI
+import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
+import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import io.meowauth.sampleapp.ui.components.MeowButton
 import io.meowauth.sampleapp.ui.theme.MeowAuthSampleTheme
 import io.meowauth.sampleapp.ui.theme.PPObjectSans
+import kotlinx.coroutines.tasks.await
 
 class LoginActivity : ComponentActivity() {
+    private lateinit var auth: FirebaseAuth
+
+    private val signInLauncher = registerForActivityResult(
+        FirebaseAuthUIActivityResultContract()
+    ) { res ->
+        this.onSignInResult(res)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        auth = Firebase.auth
+
+        val channelID = getString(R.string.notification_channel_id)
+        val name = getString(R.string.notification_channel_name)
+        val descriptionText = getString(R.string.notification_channel_desc)
+        val importance = NotificationManager.IMPORTANCE_HIGH
+        val channel = NotificationChannel(channelID, name, importance).apply {
+            description = descriptionText
+        }
+        // Register the channel with the system
+        val notificationManager: NotificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
+
+        val currentUser = auth.currentUser
+        if (currentUser != null) {
+            startActivity(Intent(this@LoginActivity, MainActivity::class.java))
+            finish()
+        }
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.setFlags(
             WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
             WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
         )
+        askNotificationPermission()
 
         setContent {
             MeowAuthSampleTheme {
@@ -80,8 +116,16 @@ class LoginActivity : ComponentActivity() {
                                 )
                             },
                             onClick = {
-                                startActivity(Intent(this@LoginActivity, MainActivity::class.java))
-                                finish()
+                                val signInIntent = AuthUI.getInstance()
+                                    .createSignInIntentBuilder()
+                                    .setAvailableProviders(
+                                        arrayListOf(
+                                            AuthUI.IdpConfig.GoogleBuilder().build()
+                                        )
+                                    )
+                                    .build()
+
+                                signInLauncher.launch(signInIntent)
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -100,6 +144,58 @@ class LoginActivity : ComponentActivity() {
                     }
                 }
             }
+        }
+    }
+
+    // Declare the launcher at the top of your Activity/Fragment:
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            // FCM SDK (and your app) can post notifications.
+        } else {
+            // TODO: Inform user that that your app will not show notifications.
+        }
+    }
+
+    private fun askNotificationPermission() {
+        // This is only necessary for API level >= 33 (TIRAMISU)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
+                PackageManager.PERMISSION_GRANTED
+            ) {
+                // FCM SDK (and your app) can post notifications.
+            } else if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
+                // TODO: display an educational UI explaining to the user the features that will be enabled
+                //       by them granting the POST_NOTIFICATION permission. This UI should provide the user
+                //       "OK" and "No thanks" buttons. If the user selects "OK," directly request the permission.
+                //       If the user selects "No thanks," allow the user to continue without notifications.
+            } else {
+                // Directly ask for the permission
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+    }
+
+    private fun onSignInResult(result: FirebaseAuthUIAuthenticationResult) {
+        startActivity(Intent(this@LoginActivity, MainActivity::class.java))
+        finish()
+
+        val response = result.idpResponse
+        if (result.resultCode == RESULT_OK) {
+            // Successfully signed in
+            val user = FirebaseAuth.getInstance().currentUser
+            user?.getIdToken(false)?.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val idToken = task.result.token
+                    Log.d("LoginActivity", "got IDToken: $idToken")
+                    startActivity(Intent(this@LoginActivity, MainActivity::class.java))
+                    finish()
+                }
+            }
+
+        } else {
+            Log.e("LoginActivity", "failed to sign in", result.idpResponse?.error)
         }
     }
 }

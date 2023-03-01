@@ -1,23 +1,15 @@
 package io.meowauth.sampleapp
 
 import android.os.Bundle
+import android.util.Log
 import android.view.WindowManager
-import androidx.activity.ComponentActivity
+import android.widget.Toast
 import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
+import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
@@ -33,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import io.meowauth.sampleapp.ui.RandomImageUrlGenerator
 import io.meowauth.sampleapp.ui.components.MeowButton
@@ -40,11 +33,47 @@ import io.meowauth.sampleapp.ui.components.MeowNetworkImage
 import io.meowauth.sampleapp.ui.theme.MeowAuthSampleTheme
 import io.meowauth.sampleapp.ui.theme.PPObjectSans
 import io.meowauth.sampleapp.ui.theme.PretendardFont
+import java.util.concurrent.Executor
 
-class TFATransactionActivity : ComponentActivity() {
+class TFATransactionActivity : AppCompatActivity() {
+    private lateinit var executor: Executor
+    private lateinit var biometricPrompt: BiometricPrompt
+    private lateinit var promptInfo: BiometricPrompt.PromptInfo
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        executor = ContextCompat.getMainExecutor(this)
+        biometricPrompt = BiometricPrompt(this, executor,
+            object : BiometricPrompt.AuthenticationCallback() {
+                override fun onAuthenticationError(errorCode: Int,
+                                                   errString: CharSequence) {
+                    super.onAuthenticationError(errorCode, errString)
+                    Toast.makeText(applicationContext,
+                        "Authentication error: $errString", Toast.LENGTH_SHORT)
+                        .show()
+                }
+
+                override fun onAuthenticationSucceeded(
+                    result: BiometricPrompt.AuthenticationResult) {
+                    super.onAuthenticationSucceeded(result)
+                    finish()
+                }
+
+                override fun onAuthenticationFailed() {
+                    super.onAuthenticationFailed()
+                    Toast.makeText(applicationContext, "Authentication failed",
+                        Toast.LENGTH_SHORT)
+                        .show()
+                }
+            })
+
+        promptInfo = BiometricPrompt.PromptInfo.Builder()
+            .setTitle("Approve Request")
+            .setSubtitle("Sign with your device key to approve.")
+            .setNegativeButtonText("Cancel")
+            .build()
+        Log.e("TFATrnasaction", "init auth")
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.setFlags(
@@ -207,7 +236,10 @@ class TFATransactionActivity : ComponentActivity() {
                                     )
                                 },
                                 iconSpacing = 4.dp,
-                                onClick = {},
+                                onClick = {
+                                    Log.e("TFATrnasaction", "biometric auth")
+                                    biometricPrompt.authenticate(promptInfo)
+                                },
                                 modifier = Modifier
                                     .weight(1f)
                             )
