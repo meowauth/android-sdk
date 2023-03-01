@@ -13,7 +13,15 @@ import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.Icon
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -35,7 +43,6 @@ import com.google.firebase.ktx.Firebase
 import io.meowauth.sampleapp.ui.components.MeowButton
 import io.meowauth.sampleapp.ui.theme.MeowAuthSampleTheme
 import io.meowauth.sampleapp.ui.theme.PPObjectSans
-import kotlinx.coroutines.tasks.await
 
 class LoginActivity : ComponentActivity() {
     private lateinit var auth: FirebaseAuth
@@ -49,6 +56,10 @@ class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         auth = Firebase.auth
+
+        if (intent.data != null) {
+            startTransactionActivity()
+        }
 
         val channelID = getString(R.string.notification_channel_id)
         val name = getString(R.string.notification_channel_name)
@@ -197,5 +208,16 @@ class LoginActivity : ComponentActivity() {
         } else {
             Log.e("LoginActivity", "failed to sign in", result.idpResponse?.error)
         }
+    }
+
+    private fun startTransactionActivity() {
+        startActivity(Intent(this, TFATransactionActivity::class.java))
+        finish()
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+
+        startTransactionActivity()
     }
 }
